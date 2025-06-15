@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { startVideoGeneration, getVideoJobStatus } from "@services/video.service";
+import { startVideoGeneration, getVideoJobStatus, getAllVideoJobs } from "@services/video.service";
 import { validateVideoBody } from "@validations/video.validation";
 import fs from "fs";
 import path from "path";
@@ -73,5 +73,15 @@ export const streamVideoHandler = async (req: Request, res: Response) => {
     };
     res.writeHead(200, head);
     fs.createReadStream(videoPath).pipe(res);
+  }
+};
+
+export const getAllJobsHandler = async (req: Request, res: Response) => {
+  try {
+    const jobs = await getAllVideoJobs();
+    res.json(jobs);
+  } catch (error: any) {
+    console.error("Failed to fetch video generation jobs:", error);
+    res.status(500).json({ error: "Failed to fetch video generation jobs", details: error.message });
   }
 };

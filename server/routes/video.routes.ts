@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { generateVideoHandler, getStatusHandler, streamVideoHandler } from "@controllers/video.controller";
+import { generateVideoHandler, getStatusHandler, streamVideoHandler, getAllJobsHandler } from "@controllers/video.controller";
 
 
 const router = Router();
@@ -30,7 +30,7 @@ const router = Router();
  */
 router.post("/generate", generateVideoHandler);
 
-/**
+/*curl http://localhost:8081/api/video/stream/1ba1c1e6-8d7f-4be4-b747-d2f19ae5d187.mp4 -o downloaded_video.mp4*
  * @swagger
  * /api/video/status/{operationId}:
  *   get:
@@ -71,5 +71,20 @@ router.get("/status/:operationId", getStatusHandler);
  *         description: Video not found
  */
 router.get("/stream/:filename", streamVideoHandler);
+
+/**
+ * @swagger
+ * /api/video/jobs:
+ *   get:
+ *     tags:
+ *       - Video
+ *     summary: Get a list of all video generation jobs
+ *     responses:
+ *       200:
+ *         description: A list of jobs
+ *       500:
+ *         description: Server error
+ */
+router.get("/jobs", getAllJobsHandler);
 
 export default router;

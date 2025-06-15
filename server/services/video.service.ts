@@ -117,5 +117,15 @@ export const startVideoGeneration = async (useCase: string, prompt: string) => {
  * @returns The video request record, or null if not found.
  */
 export const getVideoJobStatus = async (operationId: string) => {
-  return await VideoRequest.findOne({ operationId });
+  const request = await VideoRequest.findOne({ operationId });
+  return request;
+};
+
+/**
+ * Retrieves all video generation jobs from the database.
+ * @returns {Promise<any[]>} A promise that resolves to an array of video jobs.
+ */
+export const getAllVideoJobs = async () => {
+  const jobs = await VideoRequest.find().sort({ createdAt: -1 });
+  return jobs;
 };
