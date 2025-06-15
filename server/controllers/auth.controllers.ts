@@ -9,7 +9,7 @@ import { UserDocument } from "@models/user.model";
 import UserService from "@services/user.service";
 import TokenService from "@services/token.service";
 import LoggerService from "@services/logger.service";
-import EmailService from "@services/email.service";
+// import EmailService from "@services/email.service";
 
 export const postLogin = (req: Request, res: Response, next: NextFunction) => {
   const { error } = validateLoginInput(req.body);
@@ -64,8 +64,8 @@ export const postLoginForgot = async (req: Request, res: Response) => {
     await TokenService.saveToken(resetToken);
 
     try {
-      const email = EmailService.createResetPasswordEmail(user.email, resetToken.token);
-      await EmailService.sendEmail(email);
+      // const email = EmailService.createResetPasswordEmail(user.email, resetToken.token);
+      // await EmailService.sendEmail(email);
 
       return res
         .status(200)
@@ -122,8 +122,8 @@ export const postLoginReset = async (req: Request, res: Response) => {
     await UserService.saveUser(user);
 
     try {
-      const email = EmailService.createResetConfirmationEmail(user.email);
-      await EmailService.sendEmail(email);
+      // const email = EmailService.createResetConfirmationEmail(user.email);
+      // await EmailService.sendEmail(email);
       return res.status(200).send({ message: "Password has been successfully changed." });
     } catch (error) {
       LoggerService.log.error(error);
@@ -172,8 +172,8 @@ export const postVerify = async (req: Request, res: Response) => {
 
     await TokenService.saveToken(verificationToken);
     try {
-      const email = EmailService.createVerificationEmail(user.email, verificationToken.token);
-      await EmailService.sendEmail(email);
+      // const email = EmailService.createVerificationEmail(user.email, verificationToken.token);
+      // await EmailService.sendEmail(email);
 
       return res.status(200).send({ message: `A verification email has been sent.` });
     } catch (error) {

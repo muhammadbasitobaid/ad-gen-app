@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { generateVideoHandler, getStatusHandler } from "@controllers/video.controller";
+import { generateVideoHandler, getStatusHandler, streamVideoHandler } from "@controllers/video.controller";
 
 
 const router = Router();
@@ -50,5 +50,26 @@ router.post("/generate", generateVideoHandler);
  *         description: Job not found
  */
 router.get("/status/:operationId", getStatusHandler);
+
+/**
+ * @swagger
+ * /api/video/stream/{filename}:
+ *   get:
+ *     tags:
+ *       - Video
+ *     summary: Stream a video file
+ *     parameters:
+ *       - in: path
+ *         name: filename
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Video stream
+ *       404:
+ *         description: Video not found
+ */
+router.get("/stream/:filename", streamVideoHandler);
 
 export default router;

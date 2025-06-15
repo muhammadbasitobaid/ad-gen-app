@@ -6,7 +6,7 @@ import { validateEmail, validateRegisterInput } from "@validations/user.validati
 import UserService from "@services/user.service";
 import TokenService from "@services/token.service";
 import LoggerService from "@services/logger.service";
-import EmailService from "@services/email.service";
+// import EmailService from "@services/email.service";
 
 // Define email address that will send the emails to your users.
 
@@ -43,12 +43,12 @@ export const postUser = async (req: Request, res: Response) => {
       const verificationToken = TokenService.createToken();
       TokenService.setUserId(verificationToken, newUser._id);
       TokenService.saveToken(verificationToken);
-      const verificationEmail = EmailService.createVerificationEmail(
-        newUser.email,
-        verificationToken.token
-      );
+      // const verificationEmail = EmailService.createVerificationEmail(
+      //   newUser.email,
+      //   verificationToken.token
+      // );
       try {
-        EmailService.sendEmail(verificationEmail);
+        // EmailService.sendEmail(verificationEmail);
 
         return res.status(200).send({ message: "A verification mail has been sent." });
       } catch (error) {

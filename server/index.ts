@@ -4,6 +4,7 @@ import session from "express-session";
 import MongoStore from "connect-mongo";
 import bodyParser from "body-parser";
 import express from "express";
+import path from "path";
 
 import { initProd } from "@startup/prod";
 import { initDB } from "@startup/db";
@@ -37,6 +38,9 @@ app.use(
     }),
   })
 );
+
+// Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, "../public")));
 
 // Parse incoming request bodies in a middleware before your handlers, available under the req.body property.
 app.use(bodyParser.json());

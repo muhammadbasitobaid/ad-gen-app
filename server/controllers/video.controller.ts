@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
+import { startVideoGeneration, getVideoJobStatus } from "@services/video.service";
 import { validateVideoBody } from "@validations/video.validation";
-import { getVideoJobStatus, startVideoGeneration } from "@services/video.service";
+import fs from "fs";
+import path from "path";
 
 export const generateVideoHandler = async (req: Request, res: Response) => {
   const { error } = validateVideoBody(req.body);
@@ -36,4 +38,40 @@ export const getStatusHandler = async (req: Request, res: Response) => {
     videoUrl: request.videoUrl,
     createdAt: request.createdAt,
   });
+};
+
+export const streamVideoHandler = async (req: Request, res: Response) => {
+  const { filename } = req.params;
+  const videoPath = path.join(__dirname, '../../public/videos', filename);
+
+  if (!fs.existsSync(videoPath)) {
+    return res.status(404).json({ error: "Video not found." });
+  }
+
+  const stat = fs.statSync(videoPath);
+  const fileSize = stat.size;
+  const range = req.headers.range;
+
+  if (range) {
+    const parts = range.replace(/bytes=/, "").split("-");
+    const start = parseInt(parts[0], 10);
+    const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+    const chunksize = (end - start) + 1;
+    const file = fs.createReadStream(videoPath, { start, end });
+    const head = {
+      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+      'Accept-Ranges': 'bytes',
+      'Content-Length': chunksize,
+      'Content-Type': 'video/mp4',
+    };
+    res.writeHead(206, head);
+    file.pipe(res);
+  } else {
+    const head = {
+      'Content-Length': fileSize,
+      'Content-Type': 'video/mp4',
+    };
+    res.writeHead(200, head);
+    fs.createReadStream(videoPath).pipe(res);
+  }
 };

@@ -2,6 +2,9 @@ import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import VideoRequest from "@models/videoRequest.model";
 
+import path from "path";
+import { v4 as uuidv4 } from "uuid";
+
 dotenv.config();
 
 // Set credentials for Vertex AI
@@ -41,15 +44,29 @@ async function processVideoJob(dbId: string, operation: any) {
 
     const finalOperation = await Promise.race([pollPromise, timeoutPromise]);
 
-    const videoUri = finalOperation.response?.generatedVideos?.[0]?.video?.uri;
-    if (!videoUri) {
-      throw new Error("Video URI not found in the final operation response.");
+    const generatedVideos = finalOperation.response?.generatedVideos;
+    if (!generatedVideos || generatedVideos.length === 0) {
+      throw new Error("No videos generated in the final operation response.");
     }
 
-    console.log(`[Job ${dbId}] Completed. Video URI: ${videoUri}`);
+    const video = generatedVideos[0];
+    const videoFileName = `${uuidv4()}.mp4`;
+    const downloadPath = path.join(process.cwd(), "public/videos", videoFileName);
+
+    console.log(`[Job ${dbId}] Video generated. Downloading to: ${downloadPath}`);
+
+    await ai.files.download({
+      file: video,
+      downloadPath: downloadPath,
+    });
+
+    const localUrl = `/videos/${videoFileName}`;
+    console.log(`[Job ${dbId}] Download completed. Video saved to: ${localUrl}`);
+
+    // Update the database with the local URL
     await VideoRequest.findByIdAndUpdate(dbId, {
       status: 'COMPLETED',
-      videoUrl: videoUri,
+      videoUrl: localUrl,
     });
 
   } catch (error: any) {
