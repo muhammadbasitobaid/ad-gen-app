@@ -81,7 +81,7 @@ const JobsList = () => {
                   <td colSpan={3} className="text-center py-4">No jobs found.</td>
                 </tr>
               ) : (
-                jobs.map((job: Job) => (
+                jobs.filter((job: Job) => job.status !== 'FAILED').map((job: Job) => (
                   <tr key={job._id} className="border-b border-gray-200 hover:bg-gray-100">
                     <td className="py-3 px-4" title={job.prompt}>
                       {truncate(job.prompt, 50)}
