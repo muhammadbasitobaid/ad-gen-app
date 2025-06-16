@@ -1,6 +1,5 @@
-import { legacy_createStore as createStore, applyMiddleware, compose, Store } from "redux";
-
-import thunk from "redux-thunk";
+import { legacy_createStore as createStore, applyMiddleware, compose, Store, Middleware } from "redux";
+import { thunk } from "redux-thunk";
 import buildRootReducer from "./reducers/index";
 import { UserState } from "./reducers/user";
 import { UserAction } from "./actions/user";
@@ -24,7 +23,6 @@ export default function configureStore(
   state: AppState = initialState
 ): Store<AppState, UserAction<any>> {
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-  const middlewares = [thunk];
-
+  const middlewares = [thunk as Middleware];
   return createStore(buildRootReducer(), state, composeEnhancers(applyMiddleware(...middlewares)));
 }

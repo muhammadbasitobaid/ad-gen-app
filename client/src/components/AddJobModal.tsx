@@ -1,98 +1,81 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import axios from 'axios';
-import toast from 'react-hot-toast';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 import Spinner from './Spinner';
+import CloseIcon from './CloseIcon';
+import { useAddJob, NewJobData } from '../hooks/useVideoJobs';
+
+const schema = yup.object().shape({
+  prompt: yup.string().required('Prompt is required.'),
+  useCase: yup.string().required(),
+});
 
 interface AddJobModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onJobAdded: () => void;
 }
 
-interface FormData {
-  prompt: string;
-  useCase: string;
-}
+const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose }) => {
+  const {
+    register,
+    handleSubmit,
+    reset: resetForm,
+    formState: { errors },
+  } = useForm<NewJobData>({
+    resolver: yupResolver(schema),
+    defaultValues: { prompt: '', useCase: 'advertisement' },
+  });
 
-const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onJobAdded }) => {
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const { mutate, isPending: isLoading } = useAddJob({
+    onSuccess: onClose,
+  });
 
-  const onSubmit = async (data: FormData) => {
-    setIsSubmitting(true);
-    try {
-      await axios.post('http://localhost:8081/api/video/generate', data);
-      toast.success('Job added successfully!');
-      onJobAdded();
-      onClose();
-    } catch (error) {
-      console.error('Failed to add job', error);
-      toast.error('Failed to add job.');
-    } finally {
-      setIsSubmitting(false);
-    }
+
+  const onSubmit = (data: NewJobData) => {
+    mutate(data);
+    resetForm();
   };
 
-  if (!isOpen) {
-    return null;
-  }
+  if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 overflow-y-auto h-full w-full flex items-center justify-center">
-      <div className="relative mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div className="mt-3 text-center">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">Add New Job</h3>
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-2 px-7 py-3">
-            <div className="mb-4">
-              <label htmlFor="useCase" className="block text-gray-700 text-sm font-bold mb-2 text-left">
-                Use Case
-              </label>
-              <select
-                {...register('useCase', { required: 'Use case is required' })}
-                id="useCase"
-                className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none"
-                defaultValue="advertisement"
-              >
-                <option value="advertisement">Advertisement</option>
-                <option value="short_film">Short Film</option>
-                <option value="social_media">Social Media</option>
-                <option value="presentation">Presentation</option>
-              </select>
-              {errors.useCase && <p className="text-red-500 text-xs italic text-left">{errors.useCase.message}</p>}
-            </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md relative">
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+          <CloseIcon className="!size-4" />
+        </button>
+        <h2 className="text-2xl font-bold mb-4 text-black">Add New Job</h2>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="mb-4">
+            <label htmlFor="prompt" className="block text-sm font-medium text-gray-700">Prompt</label>
             <textarea
-              {...register('prompt', { required: 'Prompt is required' })}
-              className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none"
+              id="prompt"
+              {...register('prompt')}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white text-black"
               rows={4}
-              placeholder="Enter your prompt here..."
-            />
-            {errors.prompt && <p className="text-red-500 text-xs italic">{errors.prompt.message}</p>}
-            <div className="items-center px-4 py-3 space-y-2">
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <div className="flex justify-center items-center">
-                    <Spinner className="h-5 w-5 text-white" />
-                    <span className="ml-2">Submitting...</span>
-                  </div>
-                ) : (
-                  'Submit Job'
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 bg-gray-300 text-gray-800 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-400 focus:outline-none"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
+            ></textarea>
+            {errors.prompt && <p className="text-red-500 text-xs mt-1">{errors.prompt.message}</p>}
+          </div>
+          <div className="flex justify-end space-x-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="bg-gray-200 text-gray-800 py-2 px-4 rounded hover:bg-gray-300 disabled:opacity-50"
+              disabled={isLoading}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 disabled:opacity-50 flex items-center"
+              disabled={isLoading}
+            >
+              {isLoading && <Spinner className="h-5 w-5 mr-2" />}
+              Submit Job
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

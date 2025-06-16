@@ -1,7 +1,12 @@
-const CloseIcon = () => (
+import clsx from "clsx";
+interface CloseIconProps {
+    className?: string;
+}
+
+const CloseIcon: React.FC<CloseIconProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    className="h-8 w-8"
+    className={clsx("h-8 w-8", className)}
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
