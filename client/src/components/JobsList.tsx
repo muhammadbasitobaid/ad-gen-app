@@ -109,8 +109,6 @@ const JobsList = () => {
           <table className="min-w-full bg-white shadow-md rounded-lg">
             <thead className="bg-gray-800 text-white">
               <tr>
-                <th className="py-3 px-4 text-left">Job ID</th>
-                <th className="py-3 px-4 text-left">Use Case</th>
                 <th className="py-3 px-4 text-left">Prompt</th>
                 <th className="py-3 px-4 text-left">Status</th>
                 <th className="py-3 px-4 text-center">Actions</th>
@@ -138,8 +136,6 @@ const JobsList = () => {
               )}
               {!loading && !error && jobs.map((job) => (
                 <tr key={job._id} className="border-b border-gray-200 hover:bg-gray-100">
-                  <td className="py-3 px-4">{job._id}</td>
-                  <td className="py-3 px-4">{job.useCase}</td>
                   <td className="py-3 px-4" title={job.prompt}>
                     {truncate(job.prompt, 50)}
                   </td>
@@ -162,16 +158,18 @@ const JobsList = () => {
                   </td>
                   <td className="py-3 px-4 flex justify-center space-x-2">
                     <button
-                      onClick={() => handlePlay(job?.videoUrl?.split('/').pop()!)}
-                      className={`text-blue-500 hover:text-blue-700 ${job.status !== 'COMPLETED' && 'opacity-50 cursor-not-allowed'}`}
-                      disabled={job.status !== 'COMPLETED'}
+                      onClick={() => job.videoUrl && handlePlay(job.videoUrl.split('/').pop()!)}
+                      className={`text-blue-500 hover:text-blue-700 ${job.status !== 'COMPLETED' || !job.videoUrl ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      disabled={job.status !== 'COMPLETED' || !job.videoUrl}
+                      title={job.status !== 'COMPLETED' || !job.videoUrl ? 'Video not available' : 'Play video'}
                     >
                       <PlayIcon />
                     </button>
                     <button
-                      onClick={() => handleDownload(job.output_filename!)}
-                      className={`text-gray-500 hover:text-gray-700 ${!job.output_filename && 'opacity-50 cursor-not-allowed'}`}
-                      disabled={!job.output_filename}
+                      onClick={() => job.videoUrl && handleDownload(job.videoUrl.split('/').pop()!)}
+                      className={`text-gray-500 hover:text-gray-700 ${job.status !== 'COMPLETED' || !job.videoUrl ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      disabled={job.status !== 'COMPLETED' || !job.videoUrl}
+                      title={job.status !== 'COMPLETED' || !job.videoUrl ? 'Video not available' : 'Download video'}
                     >
                       <DownloadIcon />
                     </button>
