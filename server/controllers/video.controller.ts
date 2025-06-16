@@ -42,7 +42,10 @@ export const getStatusHandler = async (req: Request, res: Response) => {
 
 export const streamVideoHandler = async (req: Request, res: Response) => {
   const { filename } = req.params;
-  const videoPath = path.join(__dirname, '../../public/videos', filename);
+  console.log(filename);
+  const videoPath = path.join(process.cwd(), 'public/videos', filename);
+  console.log(videoPath);
+  console.log(fs.existsSync(videoPath));
 
   if (!fs.existsSync(videoPath)) {
     return res.status(404).json({ error: "Video not found." });
@@ -84,4 +87,18 @@ export const getAllJobsHandler = async (req: Request, res: Response) => {
     console.error("Failed to fetch video generation jobs:", error);
     res.status(500).json({ error: "Failed to fetch video generation jobs", details: error.message });
   }
+};
+
+export const downloadVideoHandler = async (req: Request, res: Response) => {
+  const { filename } = req.params;
+  const videoPath = path.join(process.cwd(), 'public/videos', filename);
+
+  if (!fs.existsSync(videoPath)) {
+    return res.status(404).json({ error: "Video not found." });
+  }
+
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.setHeader('Content-Type', 'video/mp4');
+
+  fs.createReadStream(videoPath).pipe(res);
 };

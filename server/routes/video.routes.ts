@@ -1,5 +1,11 @@
 import { Router } from "express";
-import { generateVideoHandler, getStatusHandler, streamVideoHandler, getAllJobsHandler } from "@controllers/video.controller";
+import {
+  generateVideoHandler,
+  getStatusHandler,
+  streamVideoHandler,
+  getAllJobsHandler,
+  downloadVideoHandler,
+} from "@controllers/video.controller";
 
 
 const router = Router();
@@ -86,5 +92,26 @@ router.get("/stream/:filename", streamVideoHandler);
  *         description: Server error
  */
 router.get("/jobs", getAllJobsHandler);
+
+/**
+ * @swagger
+ * /api/video/download/{filename}:
+ *   get:
+ *     tags:
+ *       - Video
+ *     summary: Download a video file
+ *     parameters:
+ *       - in: path
+ *         name: filename
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Video file
+ *       404:
+ *         description: Video not found
+ */
+router.get("/download/:filename", downloadVideoHandler);
 
 export default router;
